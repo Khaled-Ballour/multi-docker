@@ -1,3 +1,4 @@
+dist: focal
 sudo: required
 language: generic
 
@@ -8,7 +9,7 @@ before_install:
   - docker build -t ballour/react-test -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker run -e CI=true ballour/react-test npm run test
+  - docker run -e CI=true ballour/react-test npm test
 
 after_success:
   - docker build -t ballour/multi-client ./client
@@ -22,3 +23,15 @@ after_success:
   - docker push ballour/multi-nginx
   - docker push ballour/multi-server
   - docker push ballour/multi-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: "eu-west-1"
+  app: "multi-docker"
+  env: "MultiDocker-env"
+  bucket_name: "elasticbeanstalk-eu-west-1-761018880036"
+  bucket_path: "docker-multi"
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
